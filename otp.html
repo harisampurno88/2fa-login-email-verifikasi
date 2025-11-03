@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verifikasi OTP</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="card">
+    <h2>Verifikasi Kode OTP</h2>
+    <input type="text" id="otpInput" placeholder="Masukkan kode OTP">
+    <button id="verifyBtn">Verifikasi</button>
+    <p id="message"></p>
+  </div>
+  <script type="module">
+    import { db } from "./js/firebase-config.js";
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+    const verifyBtn = document.getElementById("verifyBtn");
+    const msg = document.getElementById("message");
+
+    verifyBtn.addEventListener("click", async () => {
+      const inputOtp = document.getElementById("otpInput").value.trim();
+      const uid = localStorage.getItem("uid");
+      const otpDoc = await getDoc(doc(db, "otpCodes", uid));
+
+      if (otpDoc.exists()) {
+        const data = otpDoc.data();
+        const currentTime = Date.now();
+
+        if (data.otp === inputOtp && currentTime < data.validUntil) {
+          msg.textContent = "OTP benar! Mengarahkan ke dashboard...";
+          setTimeout(() => {
+            window.location.href = "dashboard.html";
+          }, 2000);
+        } else {
+          msg.textContent = "OTP salah atau sudah kedaluwarsa.";
+        }
+      } else {
+        msg.textContent = "Kode OTP tidak ditemukan.";
+      }
+    });
+  </script>
+</body>
+</html>

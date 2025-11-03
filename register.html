@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - 2FA</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="card">
+    <h2>Buat Akun Baru</h2>
+    <input type="text" id="name" placeholder="Nama Lengkap" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button id="registerBtn">Daftar</button>
+    <p id="message"></p>
+
+    <p class="note">Sudah punya akun? <a href="index.html">Login di sini</a></p>
+  </div>
+
+  <script type="module">
+  import { auth, db } from "./js/firebase-config.js";
+  import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+  import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+  const registerBtn = document.getElementById("registerBtn");
+  const msg = document.getElementById("message");
+
+  registerBtn.addEventListener("click", async () => {
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    msg.style.color = "#1565c0";
+    msg.textContent = "Sedang memproses...";
+
+    if (!name || !email || !password) {
+      msg.style.color = "red";
+      msg.textContent = "Semua kolom harus diisi!";
+      return;
+    }
+
+    try {
+      // Buat akun baru di Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Simpan data tambahan ke Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        name: name,
+        email: email,
+        createdAt: new Date()
+      });
+
+      msg.style.color = "green";
+      msg.textContent = "✅ Registrasi berhasil! Mengalihkan ke halaman login...";
+      
+      // Tunggu 2 detik agar pesan sempat tampil
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 2000);
+
+    } catch (error) {
+      msg.style.color = "red";
+      let errorMsg = "Registrasi gagal: ";
+      switch (error.code) {
+        case "auth/email-already-in-use":
+          errorMsg += "Email sudah digunakan.";
+          break;
+        case "auth/invalid-email":
+          errorMsg += "Format email tidak valid.";
+          break;
+        case "auth/weak-password":
+          errorMsg += "Password terlalu lemah (minimal 6 karakter).";
+          break;
+        default:
+          errorMsg += "Terjadi kesalahan: " + error.message;
+      }
+      msg.textContent = errorMsg;
+    }
+  });
+</script>
+
+</body>
+</html>
