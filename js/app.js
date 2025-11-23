@@ -42,7 +42,7 @@ loginBtn.addEventListener("click", async () => {
 
     msg.textContent = "📧 Mengirim kode OTP ke email...";
 
-    emailjs.send("service_qf0dg9n", "template_o65hrc7", templateParams)
+    emailjs.send("service_cu4lk9l", "template_o65hrc7", templateParams)
       .then(() => {
         msg.style.color = "green";
         msg.textContent = "✅ OTP telah dikirim ke email kamu!";
