@@ -30,7 +30,7 @@ loginBtn.addEventListener("click", async () => {
     await setDoc(doc(db, "otpCodes", user.uid), {
       otp: otp,
       createdAt: serverTimestamp(),
-      validUntil: Date.now() + 60000 // berlaku 1 menit
+      validUntil: Date.now() + 300000 // berlaku 5 menit
     });
 
     // Kirim OTP lewat email (EmailJS)
